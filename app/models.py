@@ -24,7 +24,6 @@ class User(db.Model):
     def to_dict(self):
         return {
             'phone_number': self.phone_number,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
             "is_trainer" : self.is_trainer
         }
 
