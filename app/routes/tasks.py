@@ -7,7 +7,7 @@ from app.models import User, Task
 
 task_routes = Namespace('tasks')
 
-@task_routes.route('/create_task')
+@task_routes.route('/task')
 class CreateTask(Resource):
     @jwt_required()
     def post(self):
@@ -44,3 +44,22 @@ class CreateTask(Resource):
             "description": new_task.description,
             "due_date": new_task.due_date.isoformat()
         }, 201
+
+    @jwt_required()
+    def get(self):
+        user_id = int(get_jwt_identity())
+        tasks = Task.query.filter(
+            (Task.student_id == user_id) | (Task.trainer_id == user_id)
+        ).all()
+
+        return [
+            {
+                "id": task.id,
+                "trainer_id": task.trainer_id,
+                "student_id": task.student_id,
+                "title": task.title,
+                "description": task.description,
+                "due_date": task.due_date.isoformat()
+            }
+            for task in tasks
+        ], 200

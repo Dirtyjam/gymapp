@@ -13,6 +13,11 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     is_trainer = db.Column(db.Boolean, default=False)
     trainer_id = db.Column(db.Integer)
+    fio = db.Column(db.String(128))
+    age = db.Column(db.Integer)
+    weight = db.Column(db.Float)
+    height = db.Column(db.Float)
+    gender = db.Column(db.String(16))
 
     
     def set_password(self, password):
@@ -24,7 +29,12 @@ class User(db.Model):
     def to_dict(self):
         return {
             'phone_number': self.phone_number,
-            "is_trainer" : self.is_trainer
+            "is_trainer" : self.is_trainer,
+            "fio": self.fio,
+            "age": self.age,
+            "weight": self.weight,
+            "height": self.height,
+            "gender": self.gender
         }
 
     def add_user(self):

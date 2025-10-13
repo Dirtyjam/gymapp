@@ -90,3 +90,29 @@ class UserLogin(Resource):
 
         except Exception as e:
             return {"error": "Ошибка при авторизации"}, 500
+
+
+@user_routes.route('/profile')
+class UserUpdate(Resource):
+    @jwt_required()
+    def put(self):
+        user = User.query.filter_by(id=int(get_jwt_identity())).first()
+        if not user:
+            return {"error": "Пользователь не найден"}, 404 
+        data = request.get_json()
+        if not data:
+            return {"error": "Данные не предоставлены"}, 400    
+        user.fio = data.get('fio', user.fio)
+        user.age = data.get('age', user.age)
+        user.weight = data.get('weight', user.weight)
+        user.height = data.get('height', user.height)
+        user.gender = data.get('gender', user.gender)
+        user.put_user()
+        return {"message": "Профиль успешно обновлен", "user": user.to_dict()}, 200
+
+    @jwt_required()
+    def get(self):
+        user = User.query.filter_by(id=int(get_jwt_identity())).first()
+        if not user:
+            return {"error": "Пользователь не найден"}, 404 
+        return {"user": user.to_dict()}, 200
