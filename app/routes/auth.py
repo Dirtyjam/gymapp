@@ -101,12 +101,15 @@ class UserUpdate(Resource):
             return {"error": "Пользователь не найден"}, 404 
         data = request.get_json()
         if not data:
-            return {"error": "Данные не предоставлены"}, 400    
-        user.fio = data.get('fio', user.fio)
+            return {"error": "Данные не предоставлены"}, 400 
+        user.surname = data.get('surname', user.surname) 
+        user.name = data.get('name', user.name)
+        user.patronymic = data.get('patronymic', user.patronymic)
         user.age = data.get('age', user.age)
         user.weight = data.get('weight', user.weight)
         user.height = data.get('height', user.height)
         user.gender = data.get('gender', user.gender)
+        user.nickname = data.get('nickname', user.nickname)
         user.put_user()
         return {"message": "Профиль успешно обновлен", "user": user.to_dict()}, 200
 
@@ -116,3 +119,35 @@ class UserUpdate(Resource):
         if not user:
             return {"error": "Пользователь не найден"}, 404 
         return {"user": user.to_dict()}, 200
+
+
+@user_routes.route('/profile/students')
+class TrainerStudents(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = int(get_jwt_identity())
+        trainer = User.query.filter_by(id=user_id).first()
+
+        if not trainer:
+            return {"error": "Пользователь не найден"}, 404
+        if not trainer.is_trainer:
+            return {"error": "Доступ запрещен: вы не являетесь тренером"}, 403
+
+        students = User.query.filter_by(trainer_id=trainer.id, is_trainer=False).all()
+
+        return {
+            "students": [
+                {
+                    "id": student.id,
+                    "surname": student.surname,
+                    "name": student.name,
+                    "patronymic": student.patronymic,
+                    "nickname": student.nickname,
+                    "age": student.age,
+                    "gender": student.gender,
+                    "weight": student.weight,
+                    "height": student.height,
+                }
+                for student in students
+            ]
+        }, 200

@@ -63,3 +63,31 @@ class CreateTask(Resource):
             }
             for task in tasks
         ], 200
+    
+
+@task_routes.route('/profile/students/<string:nickname>')
+class StudentTasks(Resource):
+    @jwt_required()
+    def get(self, nickname):
+        trainer_id = int(get_jwt_identity())
+
+        trainer = User.query.filter_by(id=trainer_id, is_trainer=True).first()
+        if not trainer:
+            return {"error": "Доступ запрещен: вы не тренер"}, 403
+        student = User.query.filter_by(nickname=nickname, trainer_id=trainer.id, is_trainer=False).first()
+        if not student:
+            return {"error": "Ученик не найден или не прикреплён к вам"}, 404
+
+        tasks = Task.query.filter_by(student_id=student.id, trainer_id=trainer.id).all()
+
+        return {
+            "tasks": [
+                {
+                    "id": task.id,
+                    "title": task.title,
+                    "description": task.description,
+                    "due_date": task.due_date.isoformat() if task.due_date else None
+                }
+                for task in tasks
+            ]
+        }, 200

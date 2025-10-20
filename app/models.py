@@ -13,11 +13,14 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     is_trainer = db.Column(db.Boolean, default=False)
     trainer_id = db.Column(db.Integer)
-    fio = db.Column(db.String(128))
+    surname = db.Column(db.String(64))
+    name = db.Column(db.String(64))
+    patronymic = db.Column(db.String(64))
     age = db.Column(db.Integer)
     weight = db.Column(db.Float)
     height = db.Column(db.Float)
     gender = db.Column(db.String(16))
+    nickname = db.Column(db.String(255))
 
     
     def set_password(self, password):
@@ -30,11 +33,14 @@ class User(db.Model):
         return {
             'phone_number': self.phone_number,
             "is_trainer" : self.is_trainer,
-            "fio": self.fio,
+            "surname": self.surname,
+            "name": self.name,
+            "patronymic": self.patronymic,
             "age": self.age,
             "weight": self.weight,
             "height": self.height,
-            "gender": self.gender
+            "gender": self.gender,
+            "nickname": self.nickname
         }
 
     def add_user(self):
