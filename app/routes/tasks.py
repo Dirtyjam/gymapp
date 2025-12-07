@@ -15,10 +15,13 @@ class CreateTask(Resource):
         trainer_id = int(get_jwt_identity())
         student_id = data.get('student_id')
         title = data.get('title')
+        type = data.get('type')
+        duration = data.get('duration')
+        intensity = data.get('intensity')
         description = data.get('description')
-        due_date = data.get('due_date')
+        date_time = data.get('date_time')
 
-        if not all([student_id, title, description, due_date]):
+        if not all([student_id, title, description, date_time, type, duration, intensity]):
             return {"error": "Не все поля заполнены"}, 400
 
         new_task = Task(
@@ -26,7 +29,10 @@ class CreateTask(Resource):
             student_id=student_id,
             title=title,
             description=description,
-            due_date=due_date
+            date_time=date_time,
+            type=type,
+            duration=duration,
+            intensity=intensity
         )
         new_task.add_task()
 
@@ -36,14 +42,7 @@ class CreateTask(Resource):
 
         db.session.commit()
 
-        return {
-            "id": new_task.id,
-            "trainer_id": new_task.trainer_id,
-            "student_id": new_task.student_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "due_date": new_task.due_date.isoformat()
-        }, 201
+        return new_task.to_dict(), 201
 
     @jwt_required()
     def get(self):
@@ -53,15 +52,7 @@ class CreateTask(Resource):
         ).all()
 
         return [
-            {
-                "id": task.id,
-                "trainer_id": task.trainer_id,
-                "student_id": task.student_id,
-                "title": task.title,
-                "description": task.description,
-                "due_date": task.due_date.isoformat()
-            }
-            for task in tasks
+            task.to_dict() for task in tasks
         ], 200
     
 

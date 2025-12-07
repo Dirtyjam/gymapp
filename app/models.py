@@ -61,7 +61,10 @@ class Task(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(128), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    due_date = db.Column(db.Date, nullable=False)
+    type = db.Column(db.String(128))
+    duration = db.Column(db.Integer) 
+    intensity = db.Column(db.String(64))
+    date_time = db.Column(db.DateTime, server_default=func.now())
 
     trainer = db.relationship('User', foreign_keys=[trainer_id], backref='tasks_given')
     student = db.relationship('User', foreign_keys=[student_id], backref='tasks_received')
@@ -73,9 +76,40 @@ class Task(db.Model):
             "student_id": self.student_id,
             "title": self.title,
             "description": self.description,
-            "due_date": self.due_date.isoformat() if self.due_date else None
+            "duration": self.duration,
+            "intensity": self.intensity,
+            "date_time": self.date_time.isoformat(),
+            "type": self.type
         }
     
     def add_task(self):
+        db.session.add(self)
+        db.session.commit()
+
+class SummaryReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    difficaulty = db.Column(db.String(128), nullable=False)
+    self_health = db.Column(db.String(128), server_default=func.now())
+    comment = db.Column(db.Text)
+    is_skip = db.Column(db.Boolean, default=False)
+    skip_reason = db.Column(db.String(255))
+    date = db.Column(db.DateTime, server_default=func.now())
+
+    user = db.relationship('User', backref='summary_reports')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "difficaulty": self.difficaulty,
+            "self_health": self.self_health,
+            "comment": self.comment,
+            "is_skip": self.is_skip,
+            "skip_reason": self.skip_reason,
+            "date": self.date.isoformat()
+        }
+    
+    def add_report(self):
         db.session.add(self)
         db.session.commit()
